@@ -10,6 +10,7 @@ public class DbBackupApplication {
 		SpringApplication.run(DbBackupApplication.class, args);
 		
 		DatabaseBackup.backUp();
+		
 	}
 
 }
