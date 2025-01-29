@@ -47,25 +47,18 @@ public class DatabaseBackup {
         try (Connection connection = DriverManager.getConnection(dburl, dbUser, dbPassword)) {
             System.out.println("Connected to the database successfully!");
 
+            // Generate a backup file name based on current date
+            String backupFileName = dbName+"_backup_" + new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".sql";
+            String backupFilePath = outputDir + "/" + backupFileName;
 
-        } catch (SQLException e) {
-            System.out.println("Error connecting to the database: " + e.getMessage());
-        }
+            // Construct the mysqldump command
+            String command = String.format("mysqldump -u %s -p%s --quick --single-transaction %s > %s",
+                    dbUser, dbPassword, dbName, backupFilePath);
 
-        // Generate a backup file name based on current date
-        String backupFileName = dbName+"backup_" + new SimpleDateFormat("yyyyMMdd").format(new Date()) + ".sql";
-        String backupFilePath = outputDir + "/" + backupFileName;
-
-        // Construct the mysqldump command
-        String command = String.format("mysqldump -u %s -p%s --quick --single-transaction %s > %s",
-                dbUser, dbPassword, dbName, backupFilePath);
-
-        // Execute the mysqldump command
-        ProcessBuilder processBuilder = new ProcessBuilder();
-        processBuilder.command("cmd", "/c", command);
-        processBuilder.redirectErrorStream(true);
-
-        try {
+            // Execute the mysqldump command
+            ProcessBuilder processBuilder = new ProcessBuilder();
+            processBuilder.command("cmd", "/c", command);
+            processBuilder.redirectErrorStream(true);
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
             if (exitCode == 0) {
@@ -73,9 +66,15 @@ public class DatabaseBackup {
             } else {
                 System.out.println("Backup failed with exit code: " + exitCode);
             }
+
+        } catch (SQLException e) {
+            System.out.println("Error connecting to the database: " + e.getMessage());
         } catch (IOException | InterruptedException e) {
             System.err.println("Error during backup: " + e.getMessage());
             e.printStackTrace();
         }
+
+       
+
     }
 }
